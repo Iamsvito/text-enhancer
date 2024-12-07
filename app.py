@@ -12,10 +12,16 @@ app = Flask(__name__)
 load_dotenv()
 # 配置 OpenAI API 密钥
 openai_api_key = os.getenv("OPENAI_API_KEY")
+if openai_api_key is None:
+    raise ValueError("OPENAI_API_KEY is not set in the .env file")
+
 
 # 加载 SpaCy 英文模型
 nlp = spacy.load("en_core_web_sm")
-nltk.download('wordnet')
+try:
+    nltk.data.find('corpora/wordnet')
+except LookupError:
+    nltk.download('wordnet')
 
 # SpaCy 分词和词性标注
 def spacy_process(text):
@@ -26,17 +32,19 @@ def spacy_process(text):
 def gpt_process(text, level):
     prompt = f"請根據 CEFR {level} 等級，將下面的文本進行語言提升，將簡單的詞語換成更高級的同義詞，保持語境自然：\n{text}"
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=150,
-        temperature=0.7
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[{"role": "system", "content": "You are a helpful assistant."},
+                      {"role": "user", "content": prompt}],
+            max_tokens=150,
+            temperature=0.7
     )
+        return response['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        print(f"Error with OpenAI API: {e}")
+        return 
 
-    return response['choices'][0]['message']['content'].strip()
 
 # 处理文本管道
 def process_text_pipeline(text, level):
@@ -65,6 +73,10 @@ def index():
     if request.method == 'POST':
         input_text = request.form['inputText']
         cefr_level = request.form['cefrLevel']
+        if 'inputText' not in request.form or not request.form['inputText']:
+            return render_template('index.html', error="Input text cannot be empty.")
+        if 'cefrLevel' not in request.form or request.form['cefrLevel'] not in ['A1', 'B1', 'C1']:
+            return render_template('index.html', error="Invalid CEFR level.")
         enhanced_text = process_text_pipeline(input_text, cefr_level)
     
     return render_template('index.html', enhanced_text=enhanced_text)
