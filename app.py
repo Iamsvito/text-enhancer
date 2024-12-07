@@ -73,10 +73,6 @@ def index():
     if request.method == 'POST':
         input_text = request.form['inputText']
         cefr_level = request.form['cefrLevel']
-        if 'inputText' not in request.form or not request.form['inputText']:
-            return render_template('index.html', error="Input text cannot be empty.")
-        if 'cefrLevel' not in request.form or request.form['cefrLevel'] not in ['A1', 'B1', 'C1']:
-            return render_template('index.html', error="Invalid CEFR level.")
         enhanced_text = process_text_pipeline(input_text, cefr_level)
     
     return render_template('index.html', enhanced_text=enhanced_text)
