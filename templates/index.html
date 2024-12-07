@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Enhancer</title>
+</head>
+<body>
+    <h1>Text Enhancer</h1>
+    <form id="enhanceForm" method="POST" action="/">
+        <label for="inputText">Enter your text:</label><br>
+        <textarea id="inputText" name="inputText" rows="4" cols="50"></textarea><br><br>
+
+        <label for="cefrLevel">Select CEFR Level:</label><br>
+        <select id="cefrLevel" name="cefrLevel">
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
+            <option value="B1">B1</option>
+            <option value="B2">B2</option>
+            <option value="C1">C1</option>
+            <option value="C2">C2</option>
+        </select><br><br>
+
+        <button type="submit">Enhance Text</button>
+    </form>
+
+    {% if enhanced_text %}
+    <h2>Enhanced Text:</h2>
+    <p>{{ enhanced_text }}</p>
+    {% endif %}
+</body>
+</html>
+
+
+
